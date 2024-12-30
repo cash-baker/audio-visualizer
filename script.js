@@ -40,8 +40,8 @@ document.body.addEventListener('click', () => {
     }
 
     let x = 0;
-    const startColor = { h: 23, s: 100, l: 50 };
-    const endColor = { h: 23, s: 100, l: 85 };
+    const startColor = { h: 34, s: 100, l: 50 };
+    const endColor = { h: 34, s: 100, l: 50 };
     function animate() {
         x = 0;
         const barWidth = getBarWidth();
@@ -62,8 +62,13 @@ document.body.addEventListener('click', () => {
 
             const color = `hsl(${h}, ${s}%, ${l}%)`;
             ctx.fillStyle = color;
-            ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
-            x += barWidth + 2.5;
+            ctx.fillRect(
+                x + (canvas.width / 6), // Offset rects to center (prob better way to do this...)
+                (canvas.height - barHeight), 
+                barWidth, 
+                barHeight
+            );
+            x += barWidth;
         }
         requestAnimationFrame(animate);
     }
