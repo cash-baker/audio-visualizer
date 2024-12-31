@@ -31,47 +31,49 @@ document.body.addEventListener('click', () => {
     analyser.fftSize = 512; 
     analyser.minDecibels = -90;
     analyser.maxDecibels = 0;
-    analyser.smoothingTimeConstant = 0.85;
+    analyser.smoothingTimeConstant = 0.89;
     const bufferLength = analyser.frequencyBinCount;
     const dataArray = new Uint8Array(bufferLength);
+
     // Recalculate bar width based on window resize to preserve styling
     function getBarWidth() {
         return (canvas.width / bufferLength);
     }
-
     let x = 0;
-    const startColor = { h: 34, s: 100, l: 50 };
-    const endColor = { h: 34, s: 100, l: 50 };
     function animate() {
         x = 0;
         const barWidth = getBarWidth();
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         analyser.getByteFrequencyData(dataArray);
-        for (let i = 0; i < bufferLength; i++) {
-            barHeight = dataArray[i];
-            // Calculate color for each bar
-            // Adjust percent to focus on active frequency range (0-10kHz)
-            const percent = i / (bufferLength / 2);
-            // Clamp percent to max of 1 to ensure full color range
-            const clampedPercent = Math.min(1, percent);
-
-            // Interpolate between start and end colors
-            const h = startColor.h + (endColor.h - startColor.h) * clampedPercent;
-            const s = startColor.s + (endColor.s - startColor.s) * clampedPercent;
-            const l = startColor.l + (endColor.l - startColor.l) * clampedPercent;
-
-            const color = `hsl(${h}, ${s}%, ${l}%)`;
-            ctx.fillStyle = color;
-            ctx.fillRect(
-                x + (canvas.width / 6), // Offset rects to center (prob better way to do this...)
-                (canvas.height - barHeight), 
-                barWidth, 
-                barHeight
-            );
-            x += barWidth;
-        }
+        drawVisualizer(bufferLength, x, barWidth, 0, dataArray);
         requestAnimationFrame(animate);
     }
-
     animate();
 });
+
+function drawVisualizer(bufferLength, x, barWidth, barHeight, dataArray) {
+    const startColor = { h: 4, s: 100, l: 50 };
+    const endColor = { h: 34, s: 100, l: 50 };
+
+    for (let i = 0; i < bufferLength; i++) {
+        barHeight = dataArray[i] * 2;
+        ctx.save();
+        /* ctx.translate(canvas.width / 2, canvas.height / 2); */
+        // Calculate color for each bar
+        // Adjust percent to focus on active frequency range (0-10kHz)
+        const percent = i / (bufferLength / 2);
+        // Clamp percent to max of 1 to ensure full color range
+        const clampedPercent = Math.min(1, percent);
+
+        // Interpolate between start and end colors
+        const h = startColor.h + (endColor.h - startColor.h) * clampedPercent;
+        const s = startColor.s + (endColor.s - startColor.s) * clampedPercent;
+        const l = startColor.l + (endColor.l - startColor.l) * clampedPercent;
+
+        const color = `hsl(${h}, ${s}%, ${l}%)`;
+        ctx.fillStyle = color;
+        ctx.fillRect(x, 0, barWidth, barHeight);
+        x += barWidth;
+        ctx.restore();
+    }
+}

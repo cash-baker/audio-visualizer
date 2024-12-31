@@ -1,2 +1,1 @@
-# audio-visualizer
-Audio Visualizer Project
+# audio-visualizer by Cash Baker
